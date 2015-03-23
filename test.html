@@ -1,0 +1,35 @@
+<html>
+<head>
+<title>Blockly-test</title>
+</head>
+<body>
+<script src="blockly/google-blockly-706080c/blockly_compressed.js"></script>
+<script src="blockly/google-blockly-706080c/javascript_compressed.js"></script>
+<script src="blockly/google-blockly-706080c/blocks_compressed.js"></script>
+<script src="blockly/google-blockly-706080c/msg/js/nl.js"></script>
+<div id="blocklyDiv" style="height: 480px; width: 600px;position:absolute;right:0px"></div>
+
+<xml id="toolbox" style="display: none">
+  <category name="Control">
+    <block type="controls_if"></block>
+    <block type="controls_whileUntil"></block>
+  </category>
+  <category name="Logic">
+    <block type="logic_compare"></block>
+    <block type="logic_operation"></block>
+    <block type="logic_boolean"></block>
+  </category>
+  <category name="Variables" custom="VARIABLE"></category>
+</xml>
+
+<script>
+  var toolbox = '<xml>';
+  toolbox += '  <block type="controls_if"></block>';
+  toolbox += '  <block type="controls_whileUntil"></block>';
+  toolbox += '</xml>';
+  Blockly.inject(document.getElementById('blocklyDiv'),
+      {toolbox: document.getElementById('toolbox')});
+</script>
+
+</body>
+</html>
