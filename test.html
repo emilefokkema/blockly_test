@@ -8,7 +8,16 @@
 <script src="blockly/google-blockly-706080c/blocks_compressed.js"></script>
 <script src="blockly/google-blockly-706080c/msg/js/nl.js"></script>
 <div id="blocklyDiv" style="height: 480px; width: 600px;position:absolute;right:0px"></div>
-
+<table style="position:absolute;left:0px">
+<tr>
+<td>
+<textarea rows="30" cols="40" id="vertaling"></textarea>
+</td>
+<td>
+<div style="-webkit-appearance:button;padding:5px;cursor:hand" onClick="vertaal()">&lt;Vertaal</div>
+</td>
+</tr>
+</table>
 <xml id="toolbox" style="display: none">
   <category name="Control">
     <block type="controls_if"></block>
@@ -20,15 +29,13 @@
     <block type="logic_boolean"></block>
   </category>
   <category name="Variables" custom="VARIABLE"></category>
+  <category name="Functions" custom="PROCEDURE"></category>
 </xml>
 
 <script>
-  var toolbox = '<xml>';
-  toolbox += '  <block type="controls_if"></block>';
-  toolbox += '  <block type="controls_whileUntil"></block>';
-  toolbox += '</xml>';
-  Blockly.inject(document.getElementById('blocklyDiv'),
-      {toolbox: document.getElementById('toolbox')});
+var vertaal=function(){document.getElementById('vertaling').value=Blockly.JavaScript.workspaceToCode();}
+ 
+Blockly.inject(document.getElementById('blocklyDiv'),{toolbox: document.getElementById('toolbox')});
 </script>
 
 </body>
