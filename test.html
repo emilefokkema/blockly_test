@@ -3,10 +3,13 @@
 <title>Blockly-test</title>
 </head>
 <body>
+<!--Share your blocks with this link:https://blockly-demo.appspot.com/static/demos/blockfactory/index.html#9haw7j -->
 <script src="blockly/google-blockly-706080c/blockly_compressed.js"></script>
 <script src="blockly/google-blockly-706080c/javascript_compressed.js"></script>
 <script src="blockly/google-blockly-706080c/blocks_compressed.js"></script>
 <script src="blockly/google-blockly-706080c/msg/js/nl.js"></script>
+<script src="blockly/custom_blocks/block_loopnaar.js"></script>
+<script src="blockly/custom_blocks/generator_loopnaar.js"></script>
 <div id="blocklyDiv" style="height: 480px; width: 600px;position:absolute;right:0px"></div>
 <table style="position:absolute;left:0px">
 <tr>
@@ -30,6 +33,12 @@
   </category>
   <category name="Variables" custom="VARIABLE"></category>
   <category name="Functions" custom="PROCEDURE"></category>
+  <category name="Custom">
+	<block type="loop_naar"></block>
+  </category>
+  <category name="Math">
+	<block type="math_number"></block>
+  </category>
 </xml>
 
 <script>
