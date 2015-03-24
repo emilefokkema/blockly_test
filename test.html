@@ -16,7 +16,7 @@
 <textarea rows="30" cols="40" id="vertaling"></textarea>
 </td>
 <td>
-<div style="-webkit-appearance:button;padding:5px;cursor:hand" onClick="vertaal()">&lt;Vertaal</div>
+<div style="-webkit-appearance:button;padding:5px;cursor:hand" onClick="console.log(new PuzzleMover(Blockly))">&lt;Vertaal</div>
 </td>
 </tr>
 </table>
@@ -33,11 +33,13 @@
   <category name="Variables" custom="VARIABLE"></category>
   <category name="Functions" custom="PROCEDURE"></category>
   <category name="Custom">
-	<block type="vaar_vooruit"></block>
 	<block type="draai_bakboord"></block>
 	<block type="draai_stuurboord"></block>
 	<block type="maak_rechtsomkeert"></block>
 	<block type="ga_achteruit"></block>
+	<block type="ga_een_knoop"></block>
+	<block type="ga_twee_knopen"></block>
+	<block type="ga_drie_knopen"></block>
 	<block type="voer_uit"></block>
   </category>
   <category name="Math">
@@ -46,6 +48,60 @@
 </xml>
 
 <script>
+var PuzzleMover=function(blockly){
+	this.moveStrings=(function(){
+		if(typeof blockly==="undefined"||!blockly.hasOwnProperty("JavaScript")){return [];}
+		var matches=blockly.JavaScript.workspaceToCode().match(/\[\s*(".*?",\s*?)+?\]/g);
+		if(matches==null){return [];}
+		var s=matches[matches.length-1];
+		var validMoveStrings=["turn port", "turn starboard", "turn stern", "retreat", "one knot", "two knots", "three knots"];
+		var moveStrings=(function(){
+			var moveStrings=s.substring(1,s.length-1).split(/,/g);
+			var moveStrings1=[];
+			for(var i=0;i<moveStrings.length;i++){
+				if(moveStrings[i]!=""){
+					var moveString=moveStrings[i].replace(/['"]/g,"").trim();
+					if(validMoveStrings.indexOf(moveString)!=-1){moveStrings1[moveStrings1.length]=moveString;}
+				}
+			}
+			return moveStrings1;
+		})();
+		return moveStrings;
+	})();
+	var self=this;
+	this.mover=function(toBeMoved){
+		this.moveStrings=self.moveStrings;
+		this.moved=0;
+		this.nextMoveString=function(){
+			if(this.moved==this.moveStrings.length){return "";}
+			return this.moveStrings[this.moved++];
+		};
+		this.toBeMoved=toBeMoved;
+		var self1=this;
+		this.moveNext=(function(){
+			if(typeof self1.toBeMoved==="string"){
+				return function(){
+					var move=this.nextMoveString();
+					if(move!=""){
+						this.toBeMoved=this.toBeMoved+" did '"+move+"', ";
+					}
+					return this.toBeMoved;
+				}
+			}
+			return function(){return;};
+		})();
+		this.moveAll=function(){
+			while(this.moved<this.moveStrings.length){
+				this.moveNext();
+			}
+			return this.toBeMoved;
+		};
+	};
+	this.newMover=function(puzzle){
+		return new this.mover(puzzle);
+	};
+};
+
 var vertaal=function(){document.getElementById('vertaling').value=Blockly.JavaScript.workspaceToCode();}
  
 Blockly.inject(document.getElementById('blocklyDiv'),{toolbox: document.getElementById('toolbox')});

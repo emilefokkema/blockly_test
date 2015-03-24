@@ -26,6 +26,24 @@ Blockly.JavaScript['maak_rechtsomkeert'] = function(block) {
   return code;
 };
 
+Blockly.JavaScript['ga_een_knoop'] = function(block) {
+  // TODO: Assemble JavaScript into code variable.
+  var code = '"one knot",';
+  return code;
+};
+
+Blockly.JavaScript['ga_twee_knopen'] = function(block) {
+  // TODO: Assemble JavaScript into code variable.
+  var code = '"two knots",';
+  return code;
+};
+
+Blockly.JavaScript['ga_drie_knopen'] = function(block) {
+  // TODO: Assemble JavaScript into code variable.
+  var code = '"three knots",';
+  return code;
+};
+
 Blockly.JavaScript['ga_achteruit'] = function(block) {
   // TODO: Assemble JavaScript into code variable.
   var code = '"retreat",';
@@ -68,7 +86,7 @@ Blockly.Blocks['ga_achteruit'] = {
     this.setNextStatement(true);
     this.setTooltip('');
   }
-}
+};
 
 Blockly.Blocks['maak_rechtsomkeert'] = {
   init: function() {
@@ -81,7 +99,7 @@ Blockly.Blocks['maak_rechtsomkeert'] = {
     this.setNextStatement(true);
     this.setTooltip('');
   }
-}
+};
 
 Blockly.Blocks['draai_stuurboord'] = {
   init: function() {
@@ -94,7 +112,7 @@ Blockly.Blocks['draai_stuurboord'] = {
     this.setNextStatement(true);
     this.setTooltip('');
   }
-}
+};
 
 Blockly.Blocks['draai_bakboord'] = {
   init: function() {
@@ -107,7 +125,7 @@ Blockly.Blocks['draai_bakboord'] = {
     this.setNextStatement(true);
     this.setTooltip('');
   }
-}
+};
 
 Blockly.Blocks['vaar_vooruit'] = {
   init: function() {
@@ -117,6 +135,45 @@ Blockly.Blocks['vaar_vooruit'] = {
         .setAlign(Blockly.ALIGN_RIGHT)
         .appendField("vaar vooruit met")
         .appendField(new Blockly.FieldDropdown([["1", "ONE"], ["2", "TWO"], ["3", "THREE"]]), "SPEED");
+    this.setPreviousStatement(true);
+    this.setNextStatement(true);
+    this.setTooltip('');
+  }
+};
+
+Blockly.Blocks['ga_een_knoop'] = {
+  init: function() {
+    this.setHelpUrl('http://www.example.com/');
+    this.setColour(180);
+    this.appendDummyInput()
+        .setAlign(Blockly.ALIGN_RIGHT)
+        .appendField("ga met een (1) knoop");
+    this.setPreviousStatement(true);
+    this.setNextStatement(true);
+    this.setTooltip('');
+  }
+};
+
+Blockly.Blocks['ga_twee_knopen'] = {
+  init: function() {
+    this.setHelpUrl('http://www.example.com/');
+    this.setColour(180);
+    this.appendDummyInput()
+        .setAlign(Blockly.ALIGN_RIGHT)
+        .appendField("ga met twee knopen");
+    this.setPreviousStatement(true);
+    this.setNextStatement(true);
+    this.setTooltip('');
+  }
+};
+
+Blockly.Blocks['ga_drie_knopen'] = {
+  init: function() {
+    this.setHelpUrl('http://www.example.com/');
+    this.setColour(180);
+    this.appendDummyInput()
+        .setAlign(Blockly.ALIGN_RIGHT)
+        .appendField("ga met drie knopen");
     this.setPreviousStatement(true);
     this.setNextStatement(true);
     this.setTooltip('');
