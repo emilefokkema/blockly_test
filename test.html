@@ -16,12 +16,13 @@
 <textarea rows="30" cols="40" id="vertaling"></textarea>
 </td>
 <td>
-<div style="-webkit-appearance:button;padding:5px;cursor:hand" onClick="console.log(new PuzzleMover(Blockly))">&lt;Vertaal</div>
+<div style="-webkit-appearance:button;padding:5px;cursor:hand" onClick="document.getElementById('vertaling').value=Blockly.Xml.domToPrettyText(Blockly.Xml.workspaceToDom(Blockly.mainWorkspace))">&lt;naar xml</div>
+
 </td>
 </tr>
 </table>
 <xml id="toolbox" style="display: none">
-  <category name="Control">
+  <!--<category name="Control">
     <block type="controls_if"></block>
     <block type="controls_whileUntil"></block>
   </category>
@@ -39,15 +40,56 @@
 	<block type="ga_achteruit"></block>
 	<block type="ga_een_knoop"></block>
 	<block type="ga_twee_knopen"></block>
-	<block type="ga_drie_knopen"></block>
+	<block type="ga_drie_knopen" deletable="false"></block>
 	<block type="voer_uit"></block>
   </category>
   <category name="Math">
 	<block type="math_number"></block>
-  </category>
+  </category>-->
 </xml>
 
 <script>
+var fillBlocklyWithDeck=function(blockly, deck){
+	var xml={
+		start: '<xml xmlns="http://www.w3.org/1999/xhtml">',
+		blockStrings: [],
+		currentBlockId: 9,
+		end: '</xml>',
+		addBlockString: function(blockString){this.blockStrings[this.blockStrings.length]=blockString;},
+		addBlock: function(type, x, y, howManyTimes){
+			for(var i=1;i<=howManyTimes;i++){
+				this.addBlockString('<block type="'+type+'" id="'+this.currentBlockId+'" deletable="false" x="'+x+'" y="'+y+'"></block>');
+				this.currentBlockId+=9;
+			}
+		},
+		toString: function(){
+			var s=this.start;
+			for(var i=0;i<this.blockStrings.length;i++){s+=this.blockStrings[i];}
+			return s+this.end;
+		}
+	};
+	xml.addBlock('voer_uit',10,120,1);
+	for(cardType in deck){
+		if(cardType==="one knot"){xml.addBlock('ga_een_knoop',10,10, deck[cardType]);}
+		if(cardType==="two knots"){xml.addBlock('ga_twee_knopen',10,10,deck[cardType]);}
+		if(cardType==="three knots"){xml.addBlock('ga_drie_knopen',10,10,deck[cardType]);}
+		if(cardType==="turn port"){xml.addBlock('draai_bakboord',10,10,deck[cardType]);}
+		if(cardType==="turn starboard"){xml.addBlock('draai_stuurboord',10,10,deck[cardType]);}
+		if(cardType==="turn stern"){xml.addBlock('maak_rechtsomkeert',10,10,deck[cardType]);}
+		if(cardType==="retreat"){xml.addBlock('ga_achteruit',10,10,deck[cardType]);}
+	}
+	var dom=blockly.Xml.textToDom(xml.toString());
+	blockly.Xml.domToWorkspace(Blockly.mainWorkspace, dom);
+};
+var myDeck=function(one, two, three, port, star, stern, ret){return {
+	"one knot": one,
+	"two knots": two,
+	"three knots": three,
+	"turn port": port,
+	"turn starboard": star,
+	"turn stern": stern,
+	"retreat": ret
+};}
 var PuzzleMover=function(blockly){
 	this.moveStrings=(function(){
 		if(typeof blockly==="undefined"||!blockly.hasOwnProperty("JavaScript")){return [];}
@@ -72,30 +114,33 @@ var PuzzleMover=function(blockly){
 	this.mover=function(toBeMoved){
 		this.moveStrings=self.moveStrings;
 		this.moved=0;
+		this.isDone=function(){return this.moved==this.moveStrings.length;}
 		this.nextMoveString=function(){
-			if(this.moved==this.moveStrings.length){return "";}
+			if(this.isDone()){return "";}
 			return this.moveStrings[this.moved++];
 		};
 		this.toBeMoved=toBeMoved;
 		var self1=this;
-		this.moveNext=(function(){
+		this.move=(function(){
 			if(typeof self1.toBeMoved==="string"){
-				return function(){
-					var move=this.nextMoveString();
-					if(move!=""){
-						this.toBeMoved=this.toBeMoved+" did '"+move+"', ";
-					}
-					return this.toBeMoved;
+				return function(moveString){
+					this.toBeMoved=this.toBeMoved+" did '"+moveString+"', ";
 				}
 			}
-			return function(){return;};
+			return function(moveString){return;};
 		})();
-		this.moveAll=function(){
-			while(this.moved<this.moveStrings.length){
-				this.moveNext();
+		this.moveNext=function(){
+			var moveString=this.nextMoveString();
+			if(moveString!=""){
+				this.move(moveString);
 			}
-			return this.toBeMoved;
+			return !this.isDone();
 		};
+		this.moveAll=function(){
+			while(this.moveNext()){}
+			return false;
+		};
+		this.getToBeMoved=function(){return this.toBeMoved;}
 	};
 	this.newMover=function(puzzle){
 		return new this.mover(puzzle);
