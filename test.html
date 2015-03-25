@@ -13,43 +13,19 @@
 <table style="position:absolute;left:0px">
 <tr>
 <td>
-<textarea rows="30" cols="40" id="vertaling"></textarea>
+<textarea rows="30" cols="40" id="vertaling">var deck={&#13;&#10;"one knot":1,&#13;&#10;"two knots":1,&#13;&#10;"three knots":1,&#13;&#10;"turn port":1,&#13;&#10;"turn starboard":1,&#13;&#10;"turn stern":1,&#13;&#10;"retreat":1,&#13;&#10;};</textarea>
 </td>
 <td>
-<div style="-webkit-appearance:button;padding:5px;cursor:hand" onClick="document.getElementById('vertaling').value=Blockly.Xml.domToPrettyText(Blockly.Xml.workspaceToDom(Blockly.mainWorkspace))">&lt;naar xml</div>
+<div style="-webkit-appearance:button;padding:5px;cursor:hand" onClick="eval(document.getElementById('vertaling').value);fillBlocklyWithDeck(Blockly, deck)">fillBlocklyWithDeck&nbsp;&gt;</div>
 
 </td>
 </tr>
 </table>
 <xml id="toolbox" style="display: none">
-  <!--<category name="Control">
-    <block type="controls_if"></block>
-    <block type="controls_whileUntil"></block>
-  </category>
-  <category name="Logic">
-    <block type="logic_compare"></block>
-    <block type="logic_operation"></block>
-    <block type="logic_boolean"></block>
-  </category>
-  <category name="Variables" custom="VARIABLE"></category>
-  <category name="Functions" custom="PROCEDURE"></category>
-  <category name="Custom">
-	<block type="draai_bakboord"></block>
-	<block type="draai_stuurboord"></block>
-	<block type="maak_rechtsomkeert"></block>
-	<block type="ga_achteruit"></block>
-	<block type="ga_een_knoop"></block>
-	<block type="ga_twee_knopen"></block>
-	<block type="ga_drie_knopen" deletable="false"></block>
-	<block type="voer_uit"></block>
-  </category>
-  <category name="Math">
-	<block type="math_number"></block>
-  </category>-->
 </xml>
 
 <script>
-var fillBlocklyWithDeck=function(blockly, deck){
+var deckToBlocklyXml=function(deck){
 	var xml={
 		start: '<xml xmlns="http://www.w3.org/1999/xhtml">',
 		blockStrings: [],
@@ -58,7 +34,7 @@ var fillBlocklyWithDeck=function(blockly, deck){
 		addBlockString: function(blockString){this.blockStrings[this.blockStrings.length]=blockString;},
 		addBlock: function(type, x, y, howManyTimes){
 			for(var i=1;i<=howManyTimes;i++){
-				this.addBlockString('<block type="'+type+'" id="'+this.currentBlockId+'" deletable="false" x="'+x+'" y="'+y+'"></block>');
+				this.addBlockString('<block type="'+type+'" id="'+this.currentBlockId+'" deletable="false" x="'+(x+2*i)+'" y="'+(y+2*i)+'"></block>');
 				this.currentBlockId+=9;
 			}
 		},
@@ -68,18 +44,38 @@ var fillBlocklyWithDeck=function(blockly, deck){
 			return s+this.end;
 		}
 	};
-	xml.addBlock('voer_uit',10,120,1);
+	xml.addBlock('voer_uit',10,300,1);
+	var xy=function(i){return {x:10,y:10+i*40};}
+	var offsetXY={
+		"one knot": xy(0),
+		"two knots": xy(1),
+		"three knots": xy(2),
+		"turn port": xy(3),
+		"turn starboard": xy(4),
+		"turn stern": xy(5),
+		"retreat": xy(6),
+	};
+	var blockType={
+		"one knot": "ga_een_knoop",
+		"two knots": "ga_twee_knopen",
+		"three knots": "ga_drie_knopen",
+		"turn port": "draai_bakboord",
+		"turn starboard": "draai_stuurboord",
+		"turn stern": "maak_rechtsomkeert",
+		"retreat": "ga_achteruit",
+	};
 	for(cardType in deck){
-		if(cardType==="one knot"){xml.addBlock('ga_een_knoop',10,10, deck[cardType]);}
-		if(cardType==="two knots"){xml.addBlock('ga_twee_knopen',10,10,deck[cardType]);}
-		if(cardType==="three knots"){xml.addBlock('ga_drie_knopen',10,10,deck[cardType]);}
-		if(cardType==="turn port"){xml.addBlock('draai_bakboord',10,10,deck[cardType]);}
-		if(cardType==="turn starboard"){xml.addBlock('draai_stuurboord',10,10,deck[cardType]);}
-		if(cardType==="turn stern"){xml.addBlock('maak_rechtsomkeert',10,10,deck[cardType]);}
-		if(cardType==="retreat"){xml.addBlock('ga_achteruit',10,10,deck[cardType]);}
+		var howManyTimes=deck[cardType];
+		if(typeof howManyTimes==="string"){howManyTimes=parseInt(howManyTimes);}
+		xml.addBlock(blockType[cardType], offsetXY[cardType].x, offsetXY[cardType].y, howManyTimes);
 	}
-	var dom=blockly.Xml.textToDom(xml.toString());
-	blockly.Xml.domToWorkspace(Blockly.mainWorkspace, dom);
+	return xml.toString();
+};
+var fillBlocklyWithDeck=function(blockly, deck){
+	blockly.mainWorkspace.clear();
+	var xmlString=deckToBlocklyXml(deck);
+	var dom=blockly.Xml.textToDom(xmlString);
+	blockly.Xml.domToWorkspace(blockly.mainWorkspace, dom);
 };
 var myDeck=function(one, two, three, port, star, stern, ret){return {
 	"one knot": one,
@@ -92,8 +88,16 @@ var myDeck=function(one, two, three, port, star, stern, ret){return {
 };}
 var PuzzleMover=function(blockly){
 	this.moveStrings=(function(){
-		if(typeof blockly==="undefined"||!blockly.hasOwnProperty("JavaScript")){return [];}
-		var matches=blockly.JavaScript.workspaceToCode().match(/\[\s*(".*?",\s*?)+?\]/g);
+		if(typeof blockly==="undefined"){return [];}
+		if(!blockly.JavaScript){
+			if(typeof blockly==="string"){
+				var code=blockly;
+			}
+			else{return [];}
+		}else{
+			var code=blockly.JavaScript.workspaceToCode();
+		}
+		var matches=code.match(/\[\s*(".*?",\s*?)+?\]/g);
 		if(matches==null){return [];}
 		var s=matches[matches.length-1];
 		var validMoveStrings=["turn port", "turn starboard", "turn stern", "retreat", "one knot", "two knots", "three knots"];
@@ -127,6 +131,7 @@ var PuzzleMover=function(blockly){
 					this.toBeMoved=this.toBeMoved+" did '"+moveString+"', ";
 				}
 			}
+			
 			return function(moveString){return;};
 		})();
 		this.moveNext=function(){
