@@ -13,10 +13,29 @@
 <table style="position:absolute;left:0px">
 <tr>
 <td>
-<textarea rows="30" cols="40" id="vertaling">var deck={&#13;&#10;"one knot":1,&#13;&#10;"two knots":1,&#13;&#10;"three knots":1,&#13;&#10;"turn port":1,&#13;&#10;"turn starboard":1,&#13;&#10;"turn stern":1,&#13;&#10;"retreat":1,&#13;&#10;};</textarea>
+<textarea rows="10" cols="40" id="vertaling">var deck={&#13;&#10;"one knot":1,&#13;&#10;"two knots":1,&#13;&#10;"three knots":1,&#13;&#10;"turn port":1,&#13;&#10;"turn starboard":1,&#13;&#10;"turn stern":1,&#13;&#10;"retreat":1,&#13;&#10;};</textarea>
 </td>
 <td>
-<div style="-webkit-appearance:button;padding:5px;cursor:hand" onClick="eval(document.getElementById('vertaling').value);fillBlocklyWithDeck(Blockly, deck)">fillBlocklyWithDeck&nbsp;&gt;</div>
+<div style="-webkit-appearance:button;padding:5px;cursor:hand;width:100px" onClick="eval(document.getElementById('vertaling').value);fillBlocklyWithDeck(Blockly, deck)">fill<br>Blockly<br>With<br>Deck&nbsp;&gt;</div>
+
+</td>
+</tr>
+<tr>
+<td>
+<textarea rows="10" cols="40" id="vertaling2">question={&#13;&#10;parts:[&#13;&#10;"What did the slithy toves do in the wabe?",&#13;&#10;"gyre and gimble",&#13;&#10;"jobble and grobble",&#13;&#10;"flivel and snivel",&#13;&#10;"moodle and duddle"&#13;&#10;],&#13;&#10;answer: [[0,1]]&#13;&#10;};</textarea>
+</td>
+<td>
+<div style="-webkit-appearance:button;padding:5px;cursor:hand;width:100px" onClick="eval(document.getElementById('vertaling2').value);BlocklyQuestion.displayQuestion(Blockly, question)">display<br>Question<br>(Blockly, <br>question)&nbsp;&gt;</div>
+
+</td>
+</tr>
+<tr>
+<td>
+<textarea rows="10" cols="40" id="vertaling3"></textarea>
+</td>
+<td>
+<div style="-webkit-appearance:button;padding:5px;cursor:hand;width:100px" onClick="document.getElementById('vertaling3').value=Blockly.JavaScript.workspaceToCode()">get<br>Blockly's<br>code</div>
+<div style="-webkit-appearance:button;padding:5px;cursor:hand;width:100px" onClick="console.log(BlocklyQuestion.scoreCodeAgainstQuestion(Blockly.JavaScript.workspaceToCode(), question));">Score</div>
 
 </td>
 </tr>
@@ -25,6 +44,90 @@
 </xml>
 
 <script>
+/*var question={
+	parts: ["What did the slithy toves do do in the wabe?", "gyre and gimble", "jobble and grobble", "flivel and snivel", "moodle and duddle"],
+	answer: [[0,1]]
+}*/
+var BlocklyQuestion={
+	blockTypeName: "custom_question_part",
+	blockInitFunction: function(questionPartText){
+		return function(){
+			this.setHelpUrl('http://www.example.com/');
+			this.setColour(180);
+			this.appendDummyInput()
+				.setAlign(Blockly.ALIGN_RIGHT)
+				.appendField(questionPartText);
+			this.setPreviousStatement(true);
+			this.setNextStatement(true);
+			this.setTooltip('');
+		};
+	},
+	setBlockTypes: function(blockly, question){
+		var l=question.parts.length;
+		for(var i=0;i<l;i++){
+			blockly.Blocks[this.blockTypeName+i]={
+				init: this.blockInitFunction(question.parts[i])
+			};
+			blockly.JavaScript[this.blockTypeName+i]=(function(i){
+				return function(block){
+					var code="part"+i;
+					return code;
+				};
+			})(i);
+		}
+	},
+	getQuestionBlocklyXml: function(question){
+		var s='<xml xmlns="http://www.w3.org/1999/xhtml">';
+		var l=question.parts.length;
+		for(var i=0;i<l;i++){
+			s+='<block type="'+(this.blockTypeName+i)+'" id="'+((i+1)*9)+'" deletable="false" x="10" y="'+(10+30*i)+'"></block>';
+		}
+		return s+'</xml>';
+	},
+	displayQuestion: function(blockly, question){
+		blockly.mainWorkspace.clear();
+		this.setBlockTypes(blockly, question);
+		var xmlString=this.getQuestionBlocklyXml(question);
+		var dom=blockly.Xml.textToDom(xmlString);
+		blockly.Xml.domToWorkspace(blockly.mainWorkspace, dom);
+	},
+	scoreCodeAgainstQuestion: function(code, question){
+		var isIn=function(thing, array){return array.indexOf(thing)!=-1;};
+		var subSetOf=function(array1, array2){
+			for(var i=0;i<array1.length;i++){if(!isIn(array1[i], array2)){return false;}}
+			return true;
+		};
+		var equals=function(array1, array2){return subSetOf(array1, array2)&&subSetOf(array2, array1);};
+		var arrayIsIn=function(array, arrayarray){
+			for(var i=0;i<arrayarray.length;i++){if(equals(array, arrayarray[i])){return true;}}
+			return false;
+		};
+		var arraySubSetOf=function(arrayarray1, arrayarray2){
+			for(var i=0;i<arrayarray1.length;i++){if(!arrayIsIn(arrayarray1[i], arrayarray2)){return false;}}
+			return true;
+		};
+		var arrayEquals=function(arrayarray1, arrayarray2){return arraySubSetOf(arrayarray1, arrayarray2)&&arraySubSetOf(arrayarray2, arrayarray1);};
+		var partsArrays=(function(){
+			var groups=code.split(/\n/g);
+			var getPartsArray=function(group){
+				var partsArray=[];
+				var indices=group.split(/part/g);
+				for(var i=0;i<indices.length;i++){
+					if(indices[i]!=""){partsArray[partsArray.length]=parseInt(indices[i]);}
+				}
+				
+				return partsArray;
+			};
+			var partsArrays=[];
+			for(var i=0;i<groups.length;i++){
+				var partsArray=getPartsArray(groups[i]);
+				if(partsArray.length>1){partsArrays[partsArrays.length]=partsArray;}
+			}
+			return partsArrays;
+		})();
+		return arrayEquals(partsArrays, question.answer);
+	}
+};
 var deckToBlocklyXml=function(deck){
 	var xml={
 		start: '<xml xmlns="http://www.w3.org/1999/xhtml">',
@@ -77,15 +180,6 @@ var fillBlocklyWithDeck=function(blockly, deck){
 	var dom=blockly.Xml.textToDom(xmlString);
 	blockly.Xml.domToWorkspace(blockly.mainWorkspace, dom);
 };
-var myDeck=function(one, two, three, port, star, stern, ret){return {
-	"one knot": one,
-	"two knots": two,
-	"three knots": three,
-	"turn port": port,
-	"turn starboard": star,
-	"turn stern": stern,
-	"retreat": ret
-};}
 var PuzzleMover=function(blockly){
 	this.moveStrings=(function(){
 		if(typeof blockly==="undefined"){return [];}
