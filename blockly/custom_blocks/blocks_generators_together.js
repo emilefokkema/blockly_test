@@ -1,4 +1,14 @@
-//code generators for our custom blocks:
+/*
+
+vaarvooruit:https://blockly-demo.appspot.com/static/demos/blockfactory/index.html#unfgdk
+
+draaibakboord:https://blockly-demo.appspot.com/static/demos/blockfactory/index.html#vhipgi
+
+
+
+het plan:https://blockly-demo.appspot.com/static/demos/blockfactory/index.html#7zc2ae
+
+*/
 
 Blockly.JavaScript['voer_uit'] = function(block) {
   var statements_actions = Blockly.JavaScript.statementToCode(block, 'ACTIONS');
