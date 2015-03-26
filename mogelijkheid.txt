@@ -1,0 +1,36 @@
+// in cco-page-question-pirate.js
+Polymer({
+BlocklyPirateQuestion: {...
+questionChanged: function(oldValue, newValue){
+		var deck=newValue.deck;
+		console.log(deck);
+		var blocklyStateXml=this.BlocklyPirateQuestion.getDeckBlocklyXml(deck);
+		console.log(blocklyStateXml);
+		//this.blocklyState="";
+	}
+	
+});
+
+//in cco-page-question-pirate.html:
+
+<cco-blockly flex layout vertical state="{{blocklyState}}"></cco-blockly>
+
+// in cco-blockly.js:
+
+blocklyMakeTextBlockType: function(blockTypeName, blockCodeString, initialBlockTextField){
+		var blockly=this.Blockly;
+		blockly.Blocks[blockTypeName]={
+			init: (function(text){
+				return function(){
+					this.setHelpUrl('http://www.example.com/');
+					this.setColour(180);
+					this.appendDummyInput()
+						.setAlign(blockly.ALIGN_RIGHT)
+						.appendField(text);
+					this.setPreviousStatement(true);
+					this.setNextStatement(true);
+					this.setTooltip('');
+				}
+			})(initialBlockTextField)
+		};
+	},
